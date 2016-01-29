@@ -765,6 +765,55 @@ var publicMethods = {
 	prev: function() {
 		self.goTo( _currentItemIndex - 1);
 	},
+	
+	remove: function(removeIndex, itemsDiff) {
+		var iPrev, iNext, previousIndex, nextIndex;
+		
+		_items.splice(removeIndex, 1);
+		
+		if(itemsDiff == -1) {
+			_currentItemIndex = _getNumItems() - 1;
+			previousIndex = _getNumItems() - 2;
+			nextIndex = 0;
+		} else {
+			_currentItemIndex = 0;
+			previousIndex = _getNumItems() - 1;
+			nextIndex = 1;
+		}
+		
+		//2 or less items in the gallery
+		if(previousIndex < 0 || nextIndex >= _getNumItems()) {
+			_shout('empty');
+			return;
+		}
+		
+		_itemHolders[0].index = previousIndex;
+		_itemHolders[1].index = _currentItemIndex;
+		_itemHolders[2].index = nextIndex;
+		
+		_prevItemIndex = _currentItemIndex;
+		
+		_itemsNeedUpdate = true;
+		
+		iPrev = _items[previousIndex];
+		iPrev.loaded = iPrev.loadError = false;
+		iPrev.container = null;
+		
+		iNext = _items[nextIndex];
+		iNext.loaded = iNext.loadError = false;
+		iNext.container = null;
+		
+		iPrev.needsUpdate = iNext.needsUpdate = true;
+
+		_itemHolders[0].item = iPrev;
+		_itemHolders[2].item = iNext;
+		
+		self.cleanSlide( iPrev );
+		self.setContent( _itemHolders[0], previousIndex);
+		
+		self.cleanSlide( iNext );
+		self.setContent( _itemHolders[2], nextIndex);
+	},
 
 	// update current zoom/pan objects
 	updateCurrZoomItem: function(emulateSetContent) {
